@@ -34,6 +34,10 @@ Depends: ${misc:Depends},
          python3-truenas-connect-utils,
          setserial,
          squashfs-tools,
-         util-linux
+         util-linux,
+         sqlite3,
+         dosfstools,
+         efibootmgr,
+         grub-efi
 Description: TrueNAS Installer
  TrueNAS Installer

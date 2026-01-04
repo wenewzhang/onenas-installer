@@ -6,5 +6,6 @@ setup(
     version="1.0",
     description="TrueNAS installer",
     license="GNU3",
+    long_description = "",
     packages=find_packages(),
 )
