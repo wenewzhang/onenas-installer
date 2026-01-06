@@ -8,6 +8,7 @@ from typing import Callable
 from .disks import Disk
 from .exception import InstallError
 from .lock import installation_lock
+from .logger import logger
 from .utils import get_partitions, run
 
 __all__ = ["InstallError", "install"]
@@ -122,6 +123,7 @@ async def create_boot_pool(devices):
 
 async def run_installer(disks, authentication, post_install, sql, callback):
     with tempfile.TemporaryDirectory() as src:
+        logger.info(f"run_installer: src = {src}")
         await run(["mount", "/cdrom/TrueNAS-SCALE.update", src, "-t", "squashfs", "-o", "loop"])
         try:
             params = {
@@ -140,12 +142,13 @@ async def run_installer(disks, authentication, post_install, sql, callback):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             )
-            process.stdin.write(json.dumps(params).encode("utf-8"))
-            process.stdin.close()
+            if process.stdin:
+                process.stdin.write(json.dumps(params).encode("utf-8"))
+                process.stdin.close()
             error = None
             stderr = ""
             while True:
-                line = await process.stdout.readline()
+                line = await process.stdout.readline() if process.stdout else b""
                 if not line:
                     break
 
