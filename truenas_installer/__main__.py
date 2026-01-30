@@ -2,20 +2,17 @@ import argparse
 import asyncio
 import json
 
-from aiohttp import web
 
 # from ixhardware import get_chassis_hardware, parse_dmi
 
 from .installer import Installer
 from .installer_menu import InstallerMenu
-from .server import InstallerRPCServer
-from .server.doc import generate_api_doc
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--doc", action="store_true")
-    parser.add_argument("--server", action="store_true")
+
     args = parser.parse_args()
 
     with open("/etc/version") as f:
@@ -34,15 +31,10 @@ def main():
     installer = Installer(version, None, vendor, None)
 
     if args.doc:
-        generate_api_doc()
-    elif args.server:
-        rpc_server = InstallerRPCServer(installer)
-        app = web.Application()
-        app.router.add_routes([
-            web.get("/ws", rpc_server.handle_http_request),
-        ])
-        app.on_shutdown.append(rpc_server.on_shutdown)
-        web.run_app(app, port=8080)
+        print(
+            "API documentation generation has been removed along with server functionality."
+        )
+
     else:
         loop = asyncio.get_event_loop()
         loop.create_task(InstallerMenu(installer).run())
