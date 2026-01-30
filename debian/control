@@ -33,7 +33,7 @@ Depends: ${misc:Depends},
          python3-humanfriendly,
          python3-pyroute2,
          python3-truenas-connect-utils,
-         setserial,
+
          squashfs-tools,
          util-linux,
          sqlite3
