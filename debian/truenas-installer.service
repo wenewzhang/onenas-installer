@@ -2,7 +2,7 @@
 Description=TrueNAS Installer
 
 [Service]
-ExecStart=/usr/bin/python3 -m truenas_installer
+ExecStart=exec fbterm -- /usr/bin/python3 -m truenas_installer
 
 [Install]
 WantedBy=multi-user.target

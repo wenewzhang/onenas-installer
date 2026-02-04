@@ -6,7 +6,9 @@ import asyncio
 import subprocess
 import tempfile
 
-__all__ = ["dialog", "dialog_checklist", "dialog_menu", "dialog_msgbox", "dialog_yesno"]
+from .i18n import _
+
+__all__ = ["dialog", "dialog_checklist", "dialog_menu", "dialog_msgbox", "dialog_yesno", "dialog_password"]
 
 
 async def dialog(args, check=False):
@@ -63,21 +65,42 @@ async def dialog_menu(title, items):
     )
 
     if result.returncode == 0:
-        return await list(items.values())[int(result.stderr) - 1]()
+        selected_index = int(result.stderr) - 1
+        handlers = list(items.values())
+        return await handlers[selected_index]()
     else:
         return None
 
 
 async def dialog_msgbox(title, text):
+    # 计算合适的窗口高度
+    lines = text.rstrip().splitlines()
+    height = min(20, max(8, 4 + len(lines)))
+    # 计算合适的窗口宽度（考虑中文字符）
+    max_line_len = max(len(line) for line in lines) if lines else 0
+    width = min(80, max(60, max_line_len + 10))
+    
     await dialog([
         "--clear",
         "--title", title,
         "--msgbox", text,
-        str(4 + len(text.rstrip().splitlines())), "60",
+        str(height), str(width),
     ])
 
 
-async def dialog_password(title):
+async def dialog_password(title, password_label=None, confirm_label=None):
+    """
+    显示密码输入对话框
+    
+    Args:
+        title: 对话框标题
+        password_label: 密码标签（使用翻译后的文本）
+        confirm_label: 确认密码标签（使用翻译后的文本）
+    """
+    # 使用翻译的默认值
+    password_label = password_label or _("password")
+    confirm_label = confirm_label or _("confirm_password")
+    
     with tempfile.NamedTemporaryFile("w") as dialogrc:
         dialogrc.write(textwrap.dedent("""\
             bindkey formfield TAB FORM_NEXT
@@ -103,8 +126,8 @@ async def dialog_password(title):
                             "--visit-items",
                             "--passwordform", title,
                             "10", "70", "0",
-                            "Password:", "1", "10", "", "0", "30", "25", "50",
-                            "Confirm Password:", "2", "10", "", "2", "30", "25", "50",
+                            password_label + ":", "1", "10", "", "0", "30", "25", "50",
+                            confirm_label + ":", "2", "10", "", "2", "30", "25", "50",
                         ]
                     ),
                     env=dict(os.environ, DIALOGRC=dialogrc.name),
@@ -116,10 +139,10 @@ async def dialog_password(title):
 
                 passwords = [p.strip() for p in output.read().splitlines()]
                 if len(passwords) != 2 or not passwords[0] or not passwords[1]:
-                    await dialog_msgbox("Error", "Empty passwords are not allowed.")
+                    await dialog_msgbox(_("error"), _("empty_password"))
                     continue
                 elif passwords[0] != passwords[1]:
-                    await dialog_msgbox("Error", "Passwords do not match.")
+                    await dialog_msgbox(_("error"), _("password_mismatch"))
                     continue
 
                 return passwords[0]
