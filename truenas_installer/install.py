@@ -16,8 +16,7 @@ __all__ = ["InstallError", "install"]
 ONE_POOL = "one-pool"
 
 
-async def install(destination_disks: list[Disk], wipe_disks: list[Disk], set_pmbr: bool, authentication: dict | None,
-                  post_install: dict | None, sql: str | None, callback: Callable):
+async def install(destination_disks: list[Disk], wipe_disks: list[Disk], callback: Callable):
     with installation_lock:
         try:
             if not os.path.exists("/etc/hostid"):
@@ -45,9 +44,6 @@ async def install(destination_disks: list[Disk], wipe_disks: list[Disk], set_pmb
             try:
                 await run_installer(
                     [disk.name for disk in destination_disks],
-                    authentication,
-                    post_install,
-                    sql,
                     callback,
                 )
             finally:
@@ -69,7 +65,7 @@ async def wipe_disk(disk: Disk, callback: Callable):
     await run(["sgdisk", "-Z", disk.device], check=False)
 
 
-async def format_disk(disk: Disk, set_pmbr: bool, callback: Callable):
+async def format_disk(disk: Disk, callback: Callable):
     await wipe_disk(disk, callback)
 
     # Create BIOS boot partition
@@ -93,8 +89,8 @@ async def format_disk(disk: Disk, set_pmbr: bool, callback: Callable):
         if part_device is None:
             raise InstallError(f"Failed to find partition number {partnum} on {disk.name}")
 
-    if set_pmbr:
-        await run(["parted", "-s", disk.device, "disk_set", "pmbr_boot", "on"], check=False)
+    # if set_pmbr:
+    #     await run(["parted", "-s", disk.device, "disk_set", "pmbr_boot", "on"], check=False)
 
 
 async def create_one_pool(devices):
@@ -121,18 +117,15 @@ async def create_one_pool(devices):
     await run(["zfs", "create", "-o", "canmount=off", "-o", "mountpoint=legacy", f"{ONE_POOL}/grub"])
 
 
-async def run_installer(disks, authentication, post_install, sql, callback):
+async def run_installer(disks, callback):
     with tempfile.TemporaryDirectory() as src:
         logger.info(f"run_installer: src = {src}")
         await run(["mount", "/cdrom/TrueNAS-SCALE.update", src, "-t", "squashfs", "-o", "loop"])
         try:
             params = {
-                "authentication_method": authentication,
                 "disks": disks,
                 "json": True,
                 "pool_name": ONE_POOL,
-                "post_install": post_install,
-                "sql": sql,
                 "src": src,
             }
             process = await asyncio.create_subprocess_exec(

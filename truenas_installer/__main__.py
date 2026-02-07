@@ -15,11 +15,12 @@ def main():
 
     args = parser.parse_args()
 
-    with open("/.data/.version") as f:
-        version = f.read().strip()
-
-    vendor = "OneNAS"
+    vendor  = "OneNAS"
+    version = "260207"
     try:
+        with open("/.data/.version") as f:
+            version = f.read().strip()
+
         with open("/.data/.vendor") as f:
             vendor = json.loads(f.read()).get("name", "OneNAS")
     except Exception:

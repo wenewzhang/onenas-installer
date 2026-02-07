@@ -121,7 +121,7 @@ class InstallerMenu:
                 for disk in disks
                 if (
                     any(
-                        zfs_member.pool == "boot-pool"
+                        zfs_member.pool == "one-pool"
                         for zfs_member in disk.zfs_members
                     )
                     and disk.name not in destination_disks
@@ -156,37 +156,11 @@ class InstallerMenu:
         if not await dialog_yesno(_("installation", vendor=self.installer.vendor), text):
             return False
 
-        if vendor == "HexOS":
-            authentication_method = await self._authentication_truenas_admin()
-        else:
-            auth_items = {
-                _("auth_truenas_admin"): self._authentication_truenas_admin,
-                _("auth_webui"): self._authentication_webui,
-            }
-            authentication_method = await dialog_menu(
-                _("web_ui_auth_method"),
-                auth_items,
-            )
-            if authentication_method is False:
-                return False
-
-        set_pmbr = False
-        if not self.installer.efi:
-            set_pmbr = await dialog_yesno(
-                _("legacy_boot"),
-                _("allow_efi"),
-            )
-
-        sql = ""
 
         try:
             await install(
                 self._select_disks(disks, destination_disks),
                 self._select_disks(disks, wipe_disks),
-                set_pmbr,
-                authentication_method,
-                None,
-                sql,
                 self._callback,
             )
         except InstallError as e:
