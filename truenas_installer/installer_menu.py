@@ -131,7 +131,7 @@ class InstallerMenu:
                 # The presence of multiple `boot-pool` disks with different guids leads to boot pool import error
                 text = "\n".join(
                     [
-                        _("existing_boot_pool", disks=", ".join(wipe_disks)),
+                        _("existing_one_pool", disks=", ".join(wipe_disks)),
                         "",
                         _("proceed_erase", disks=", ".join(wipe_disks)),
                     ]

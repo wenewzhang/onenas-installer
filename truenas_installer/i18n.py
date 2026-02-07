@@ -37,7 +37,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "installation_succeeded_msg": "The {vendor} installation on {disks} succeeded!\\nPlease reboot and remove the installation media.",
         
         # 磁盘相关
-        "existing_boot_pool": "Disk(s) {disks} contain existing TrueNAS boot pool, but they were not selected for TrueNAS installation. This configuration will not work unless these disks are erased.",
+        "existing_one_pool": "Disk(s) {disks} contain existing TrueNAS boot pool, but they were not selected for TrueNAS installation. This configuration will not work unless these disks are erased.",
         "proceed_erase": "Proceed with erasing {disks}?",
         
         # 警告和提示
@@ -100,7 +100,7 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "installation_succeeded_msg": "{vendor} 已成功安装到 {disks}！\\n请重启并移除安装介质。",
         
         # 磁盘相关
-        "existing_boot_pool": "磁盘 {disks} 包含现有的 TrueNAS 启动池，但未选择用于 TrueNAS 安装。除非擦除这些磁盘，否则此配置将无法工作。",
+        "existing_one_pool": "磁盘 {disks} 包含现有的 TrueNAS 启动池，但未选择用于 TrueNAS 安装。除非擦除这些磁盘，否则此配置将无法工作。",
         "proceed_erase": "是否继续擦除 {disks}？",
         
         # 警告和提示

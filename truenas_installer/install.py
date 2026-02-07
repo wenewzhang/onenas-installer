@@ -13,7 +13,7 @@ from .utils import get_partitions, run
 
 __all__ = ["InstallError", "install"]
 
-BOOT_POOL = "boot-pool"
+ONE_POOL = "one-pool"
 
 
 async def install(destination_disks: list[Disk], wipe_disks: list[Disk], set_pmbr: bool, authentication: dict | None,
@@ -41,7 +41,7 @@ async def install(destination_disks: list[Disk], wipe_disks: list[Disk], set_pmb
                     disk_parts.append(found)
 
             callback(0, "Creating boot pool")
-            await create_boot_pool(disk_parts)
+            await create_one_pool(disk_parts)
             try:
                 await run_installer(
                     [disk.name for disk in destination_disks],
@@ -51,7 +51,7 @@ async def install(destination_disks: list[Disk], wipe_disks: list[Disk], set_pmb
                     callback,
                 )
             finally:
-                await run(["zpool", "export", "-f", BOOT_POOL])
+                await run(["zpool", "export", "-f", ONE_POOL])
         except subprocess.CalledProcessError as e:
             raise InstallError(f"Command {' '.join(e.cmd)} failed:\n{e.stderr.rstrip()}")
 
@@ -97,7 +97,7 @@ async def format_disk(disk: Disk, set_pmbr: bool, callback: Callable):
         await run(["parted", "-s", disk.device, "disk_set", "pmbr_boot", "on"], check=False)
 
 
-async def create_boot_pool(devices):
+async def create_one_pool(devices):
     await run(
         [
             "zpool", "create", "-f",
@@ -112,13 +112,13 @@ async def create_boot_pool(devices):
             "-O", "normalization=formD",
             "-O", "relatime=on",
             "-O", "xattr=sa",
-            BOOT_POOL,
+            ONE_POOL,
         ] +
         (["mirror"] if len(devices) > 1 else []) +
         devices
     )
-    await run(["zfs", "create", "-o", "canmount=off", f"{BOOT_POOL}/ROOT"])
-    await run(["zfs", "create", "-o", "canmount=off", "-o", "mountpoint=legacy", f"{BOOT_POOL}/grub"])
+    await run(["zfs", "create", "-o", "canmount=off", f"{ONE_POOL}/ROOT"])
+    await run(["zfs", "create", "-o", "canmount=off", "-o", "mountpoint=legacy", f"{ONE_POOL}/grub"])
 
 
 async def run_installer(disks, authentication, post_install, sql, callback):
@@ -130,7 +130,7 @@ async def run_installer(disks, authentication, post_install, sql, callback):
                 "authentication_method": authentication,
                 "disks": disks,
                 "json": True,
-                "pool_name": BOOT_POOL,
+                "pool_name": ONE_POOL,
                 "post_install": post_install,
                 "sql": sql,
                 "src": src,
