@@ -8,7 +8,7 @@ import tempfile
 
 from .i18n import _
 
-__all__ = ["dialog", "dialog_checklist", "dialog_menu", "dialog_msgbox", "dialog_yesno", "dialog_password"]
+__all__ = ["dialog", "dialog_checklist", "dialog_menu", "dialog_msgbox", "dialog_yesno", "dialog_password", "dialog_inputbox", "dialog_radiolist"]
 
 
 async def dialog(args, check=False):
@@ -156,3 +156,57 @@ async def dialog_yesno(title, text) -> bool:
         "13", "74",
     ])
     return result.returncode == 0
+
+
+async def dialog_inputbox(title, text, init=""):
+    """
+    显示输入对话框
+    
+    Args:
+        title: 对话框标题
+        text: 提示文本
+        init: 初始值
+        
+    Returns:
+        用户输入的字符串，如果取消则返回 None
+    """
+    result = await dialog([
+        "--clear",
+        "--title", title,
+        "--inputbox", text,
+        "10", "60", init,
+    ])
+    
+    if result.returncode == 0:
+        return result.stderr.strip()
+    else:
+        return None
+
+
+async def dialog_radiolist(title, text, items):
+    """
+    显示单选列表对话框
+    
+    Args:
+        title: 对话框标题
+        text: 提示文本
+        items: 字典，键为选项标识，值为 (显示文本, 是否默认选中)
+        
+    Returns:
+        选中的键，如果取消则返回 None
+    """
+    args = [
+        "--clear",
+        "--title", title,
+        "--radiolist", text, "20", "60", str(len(items)),
+    ]
+    
+    for key, (label, default) in items.items():
+        args.extend([key, label, "on" if default else "off"])
+    
+    result = await dialog(args)
+    
+    if result.returncode == 0:
+        return result.stderr.strip()
+    else:
+        return None

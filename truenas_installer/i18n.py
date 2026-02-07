@@ -65,6 +65,18 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "legacy_boot": "Legacy Boot",
         "allow_efi": "Allow EFI boot? Enter Yes for systems with newer components such as NVMe devices. Enter No when system hardware requires legacy BIOS boot workaround.",
         
+        # 分区相关
+        "partition_title": "Partition Settings",
+        "partition_choice_text": "Total disk capacity: {total_size}\n\nPlease select how to allocate system partition:",
+        "use_full_disk": "Use entire disk for system",
+        "use_percentage": "Use percentage of disk capacity",
+        "partition_percentage_title": "System Partition Size",
+        "enter_percentage": "Total disk capacity: {total_size}\n\nEnter the percentage of disk to use for system partition (1-100):",
+        "percentage_range_error": "Percentage must be between 1 and 100.",
+        "percentage_invalid_error": "Please enter a valid number.",
+        "confirm_partition_size": "Confirm Partition Size",
+        "partition_size_preview": "Total capacity: {total_size}\n\nSystem partition: {percentage}% = {system_size}\nRemaining space: {remaining_size}\n\nIs this correct?",
+        
         # 按钮和通用
         "yes": "Yes",
         "no": "No",
@@ -127,6 +139,18 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         # 启动相关
         "legacy_boot": "传统启动",
         "allow_efi": "允许 EFI 启动？对于具有 NVMe 设备等较新组件的系统，请选择是。当系统硬件需要传统 BIOS 启动解决方案时，请选择否。",
+        
+        # 分区相关
+        "partition_title": "分区设置",
+        "partition_choice_text": "磁盘总容量: {total_size}\n\n请选择如何分配系统分区:",
+        "use_full_disk": "整个磁盘都用作系统盘",
+        "use_percentage": "按磁盘容量百分比设置",
+        "partition_percentage_title": "系统分区大小",
+        "enter_percentage": "磁盘总容量: {total_size}\n\n请输入系统分区占用的百分比 (1-100):",
+        "percentage_range_error": "百分比必须在 1 到 100 之间。",
+        "percentage_invalid_error": "请输入有效的数字。",
+        "confirm_partition_size": "确认分区大小",
+        "partition_size_preview": "总容量: {total_size}\n\n系统分区: {percentage}% = {system_size}\n剩余空间: {remaining_size}\n\n是否正确?",
         
         # 按钮和通用
         "yes": "是",

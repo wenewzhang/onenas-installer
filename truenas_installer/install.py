@@ -24,7 +24,7 @@ async def install(destination_disks: list[Disk], wipe_disks: list[Disk], callbac
 
             for disk in destination_disks:
                 callback(0, f"Formatting disk {disk.name}")
-                await format_disk(disk, set_pmbr, callback)
+                await format_disk(disk, callback)
 
             for disk in wipe_disks:
                 callback(0, f"Wiping disk {disk.name}")

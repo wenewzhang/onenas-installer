@@ -6,9 +6,11 @@ import humanfriendly
 
 from .dialog import (
     dialog_checklist,
+    dialog_inputbox,
     dialog_menu,
     dialog_msgbox,
     dialog_password,
+    dialog_radiolist,
     dialog_yesno,
 )
 from .disks import Disk, list_disks
@@ -156,6 +158,71 @@ class InstallerMenu:
         if not await dialog_yesno(_("installation", vendor=self.installer.vendor), text):
             return False
 
+        # 根据 disk 大小，让用户选择分区方式
+        # 获取选中磁盘的总容量
+        selected_disks = [d for d in disks if d.name in destination_disks]
+        total_size = sum(d.size for d in selected_disks)
+        total_size_str = humanfriendly.format_size(total_size, binary=True)
+
+        # 让用户选择分区方式
+        partition_choice = await dialog_radiolist(
+            _("partition_title"),
+            _("partition_choice_text", total_size=total_size_str),
+            {
+                "full": (_("use_full_disk"), True),
+                "percentage": (_("use_percentage"), False),
+            },
+        )
+
+        if partition_choice is None:
+            return False  # 用户取消
+
+        # 存储用户的选择和系统分区大小
+        use_full_disk = (partition_choice == "full")
+        system_partition_percentage = 100  # 默认使用全部
+
+        if not use_full_disk:
+            # 用户选择按百分比，询问百分比
+            while True:
+                percentage_input = await dialog_inputbox(
+                    _("partition_percentage_title"),
+                    _("enter_percentage", total_size=total_size_str),
+                    "50",
+                )
+                
+                if percentage_input is None:
+                    return False  # 用户取消
+                
+                try:
+                    percentage = int(percentage_input)
+                    if 1 <= percentage <= 100:
+                        # 计算分区容量
+                        system_size = total_size * percentage // 100
+                        system_size_str = humanfriendly.format_size(system_size, binary=True)
+                        remaining_size = total_size - system_size
+                        remaining_size_str = humanfriendly.format_size(remaining_size, binary=True)
+                        
+                        # 显示计算结果并让用户确认
+                        confirm_text = _(
+                            "partition_size_preview",
+                            total_size=total_size_str,
+                            percentage=percentage,
+                            system_size=system_size_str,
+                            remaining_size=remaining_size_str,
+                        )
+                        
+                        if await dialog_yesno(_("confirm_partition_size"), confirm_text):
+                            system_partition_percentage = percentage
+                            break
+                        # 用户选择重新输入，继续循环
+                    else:
+                        await dialog_msgbox(_("error"), _("percentage_range_error"))
+                except ValueError:
+                    await dialog_msgbox(_("error"), _("percentage_invalid_error"))
+
+        # 将选择存入变量（供后续安装使用）
+        # use_full_disk: 是否使用整个磁盘
+        # system_partition_percentage: 系统分区占用的百分比
 
         try:
             await install(
