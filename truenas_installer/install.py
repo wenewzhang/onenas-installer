@@ -159,11 +159,15 @@ start=513MiB, size=+, type=83
 EOF"""
         part_nums = [1, 2]
     else:
+        # 计算第三个分区的起始位置 (513MiB + min_system_size)
+        # min_system_size 格式如 "8192m"，提取数值部分
+        min_size_num = int(''.join(filter(str.isdigit, min_system_size)))
+        third_start = 513 + min_size_num
         bash_cmd = f"""cat <<'EOF' | sfdisk "{disk.device}"
 label: dos
 start=1MiB, size=512MiB, type=83, bootable
 start=513MiB, size={min_system_size}, type=83
-start=513MiB+{min_system_size}, size=+, type=83
+start={third_start}MiB, size=+, type=83
 EOF"""
         part_nums = [1, 2, 3]
 
