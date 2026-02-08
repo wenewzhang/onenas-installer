@@ -18,10 +18,10 @@ ONE_POOL = "one-pool"
 
 async def install(destination_disks: list[Disk], wipe_disks: list[Disk],system_pct: int, min_system_size:int, callback: Callable):
     boot_mode = check_boot_mode()
-    logger.info(f"boot mode: {boot_mode}")   
     min_system_size_mib = min_system_size // (1024 * 1024)
     min_system_size_str = f"{min_system_size_mib}m"  # 例如: "+8192m"
                   
+    logger.info(f"boot mode: {boot_mode} system percent: {system_pct} system disk size: {min_system_size_str}")                     
     with installation_lock:
         try:
             if not os.path.exists("/etc/hostid"):
@@ -83,7 +83,7 @@ async def format_disk_uefi(disk: Disk, system_pct: int, min_system_size:str, cal
     if system_pct == 100:
         await run(["sgdisk", "-n2:0:0", "-t2:BF01", disk.device])        
     else:
-        await run(["sgdisk", f"-n2:0+{min_system_size}", "-t2:BF00", disk.device])        
+        await run(["sgdisk", f"-n2:0:+{min_system_size}", "-t2:BF00", disk.device])        
         await run(["sgdisk", "-n3:0:0", "-t3:BF01", disk.device])
         
 
@@ -111,7 +111,7 @@ async def format_disk_bios(disk: Disk, system_pct: int, min_system_size:str, cal
     if system_pct == 100:
         await run(["sgdisk", "-n2:0:0", "-t2:BF01", disk.device])        
     else:
-        await run(["sgdisk", f"-n2:0+{min_system_size}", "-t2:BF00", disk.device])        
+        await run(["sgdisk", f"-n2:0:+{min_system_size}", "-t2:BF00", disk.device])        
         await run(["sgdisk", "-n3:0:0", "-t3:BF01", disk.device])
         
 
