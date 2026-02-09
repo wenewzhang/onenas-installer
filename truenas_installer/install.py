@@ -131,26 +131,6 @@ async def format_disk_bios(disk: Disk, system_pct: int, min_system_size:str, cal
 async def format_disk_bios2(disk: Disk, system_pct: int, min_system_size: str, callback: Callable):
     await wipe_disk(disk, callback)
 
-    # sfdisk_input = f"""label: dos
-    # start=1MiB, size=512MiB, type=83, bootable
-    # start=513MiB, size=+, type=83
-    # """
-    # try:
-    #     # 执行 sfdisk 命令
-    #     # input 参数会自动处理 stdin 的传递
-    #     result = subprocess.run(
-    #         ["sfdisk", {disk.device}],
-    #         input=sfdisk_input,
-    #         text=True,          # 确保以文本模式处理输入输出
-    #         capture_output=True, # 捕获错误信息以便调试
-    #         check=True           # 如果执行失败则抛出异常
-    #     )
-    #     logger.info(f"sfdisk success: {disk.device}")
-        
-    # except subprocess.CalledProcessError as e:
-    #     logger.error(f"sfdisk fail: {disk.device}")
-    # 使用 sfdisk 创建 MBR 分区表 (dos)
-    # 第一个分区：1MiB 开始，512MiB 大小，Linux 类型(83)，可引导
     if system_pct == 100:
         bash_cmd = f"""cat <<'EOF' | sfdisk "{disk.device}"
 label: dos
@@ -208,28 +188,27 @@ async def format_disk(disk: Disk, callback: Callable):
     #     await run(["parted", "-s", disk.device, "disk_set", "pmbr_boot", "on"], check=False)
 
 
-async def create_one_pool(devices):
+async def create_one_pool(devices,version):
+    bootpool=f"zuti-{version}"
     await run(
         [
             "zpool", "create", "-f",
             "-o", "ashift=12",
-            "-o", "cachefile=none",
-            "-o", "compatibility=grub2",
-            "-O", "acltype=off",
-            "-O", "canmount=off",
-            "-O", "compression=on",
-            "-O", "devices=off",
-            "-O", "mountpoint=none",
-            "-O", "normalization=formD",
+            "-o", "autotrim=on",
+            "-o", "compatibility=openzfs-2.3-linux",
+            "-O", "acltype=posixacl",
+            "-O", "compression=lz4",
             "-O", "relatime=on",
             "-O", "xattr=sa",
+            "-m", "none",
             ONE_POOL,
         ] +
         (["mirror"] if len(devices) > 1 else []) +
         devices
     )
-    await run(["zfs", "create", "-o", "canmount=off", f"{ONE_POOL}/ROOT"])
-    await run(["zfs", "create", "-o", "canmount=off", "-o", "mountpoint=legacy", f"{ONE_POOL}/grub"])
+    await run(["zfs", "create", "-o", "mountpoint=none", f"{ONE_POOL}/ROOT"])
+    await run(["zfs", "create", "-o", "canmount=noauto", "-o", "mountpoint=/", f"{ONE_POOL}/ROOT/{bootpool}"])
+
 
 
 async def run_installer(disks, callback):
