@@ -83,12 +83,13 @@ async def format_disk_uefi(disk: Disk, system_pct: int, min_system_size:str, cal
 
     await run(["sgdisk", "-n1:1m:+512m", "-t", "1:ef00", disk.device])
     if system_pct == 100:
-        await run(["sgdisk", "-n2:0:0", "-t2:BF01", disk.device])        
+        await run(["sgdisk", "-n2:0:0", "-t2:BF01", disk.device])
+        part_nums = [1, 2]        
     else:
         await run(["sgdisk", f"-n2:0:+{min_system_size}", "-t2:BF00", disk.device])        
         await run(["sgdisk", "-n3:0:0", "-t3:BF01", disk.device])
+        part_nums = [1, 2, 3]
         
-
     # Bad hardware is bad, but we've seen a few users
     # state that by the time we run `parted` command
     # down below OR the caller of this function tries
@@ -96,7 +97,7 @@ async def format_disk_uefi(disk: Disk, system_pct: int, min_system_size:str, cal
     # be present. This is almost _exclusively_ related
     # to bad hardware, but we will wait up to 30 seconds
     # for the partitions to show up in sysfs.
-    disk_parts = await get_partitions(disk.device, [1, 2, 3], tries=30)
+    disk_parts = await get_partitions(disk.device, part_nums, tries=30)
     for partnum, part_device in disk_parts.items():
         logger.info("format_disk_uefi disk_parts:%s",disk_parts)
         if part_device is None:
