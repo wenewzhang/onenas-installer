@@ -12,7 +12,11 @@ __all__ = ["dialog", "dialog_checklist", "dialog_menu", "dialog_msgbox", "dialog
 
 
 async def dialog(args, check=False):
-    args = ["dialog"] + args
+    # 根据当前语言设置按钮标签
+    from .i18n import _
+    ok_label = _("ok")
+    cancel_label = _("cancel")
+    args = ["dialog", "--ok-label", ok_label, "--cancel-label", cancel_label] + args
 
     process = await asyncio.create_subprocess_exec(*args, stderr=subprocess.PIPE)
     _, stderr = await process.communicate()
