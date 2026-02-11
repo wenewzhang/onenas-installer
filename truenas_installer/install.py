@@ -62,6 +62,7 @@ async def install(destination_disks: list[Disk], wipe_disks: list[Disk], system_
                     callback,
                     version,
                     language,
+                    boot_mode,
                 )
             finally:
                 await run(["zpool", "export", "-f", ONE_POOL])
@@ -217,7 +218,7 @@ async def create_one_pool(devices):
 
 
 
-async def run_installer(disks, callback, version: str | None = None, language: str | None = None):
+async def run_installer(disks, callback, version: str | None = None, language: str | None = None, boot_mode: str | None = None):
     with tempfile.TemporaryDirectory() as src:
         logger.info(f"run_installer: src = {src}")
         await run(["mount", "/cdrom/TrueNAS-SCALE.update", src, "-t", "squashfs", "-o", "loop"])
@@ -229,6 +230,7 @@ async def run_installer(disks, callback, version: str | None = None, language: s
                 "src": src,
                 "version": version,
                 "language": language,
+                "boot_mode": boot_mode,
             }
             process = await asyncio.create_subprocess_exec(
                 "python3", "-m", "truenas_install",
