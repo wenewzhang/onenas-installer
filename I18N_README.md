@@ -24,7 +24,7 @@ TrueNAS Installer 现在支持多语言切换功能，目前支持：
 ### 在代码中使用翻译
 
 ```python
-from truenas_installer.i18n import _, set_language, get_language
+from onenas_installer.i18n import _, set_language, get_language
 
 # 设置语言
 set_language("zh")  # 切换到中文
@@ -41,7 +41,7 @@ message = _("installation_succeeded")
 ## 文件结构
 
 ```
-truenas_installer/
+onenas_installer/
 ├── i18n.py              # 国际化模块，包含所有翻译
 ├── installer_menu.py    # 主菜单（已添加语言选择功能）
 ├── dialog.py            # 对话框（支持国际化）
@@ -75,10 +75,10 @@ TRANSLATIONS = {
 
 ```bash
 # 方法1: 直接运行测试脚本
-python truenas_installer/test_display_languages.py
+python onenas_installer/test_display_languages.py
 
 # 方法2: 使用 pytest
-python -m pytest truenas_installer/test_display_languages.py -v -s
+python -m pytest onenas_installer/test_display_languages.py -v -s
 ```
 
 ## 技术说明

@@ -9,7 +9,7 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from truenas_installer.i18n import _, set_language, get_available_languages, get_language
+from onenas_installer.i18n import _, set_language, get_available_languages, get_language
 
 
 def test_language_switching():

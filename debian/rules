@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-export PYBUILD_NAME=truenas_installer
+export PYBUILD_NAME=onenas_installer
 
 %:
 	dh $@ --with python3 --buildsystem=pybuild

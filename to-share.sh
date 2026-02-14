@@ -3,8 +3,8 @@
 # 删除旧的压缩包（如果存在）
 rm -f ti.tar.gz
 
-# 打包 truenas_installer 目录
-tar czf ti.tar.gz truenas_installer
+# 打包 onenas_installer 目录
+tar czf ti.tar.gz onenas_installer
 
 # 获取内网IP（优先使用 hostname -I，如果不支持则使用 ip 命令）
 if command -v hostname >/dev/null 2>&1 && hostname -I >/dev/null 2>&1; then

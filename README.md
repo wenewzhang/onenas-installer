@@ -1,3 +1,3 @@
-# truenas-installer
+#onenas-installer
 
-Debian Installer for TrueNAS
+Debian Installer for OneNAS
