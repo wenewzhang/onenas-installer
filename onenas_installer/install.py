@@ -221,7 +221,7 @@ async def create_one_pool(devices):
 async def run_installer(disks, callback, version: str | None = None, language: str | None = None, boot_mode: str | None = None):
     with tempfile.TemporaryDirectory() as src:
         logger.info(f"run_installer: src = {src}")
-        await run(["mount", "/cdrom/TrueNAS-SCALE.update", src, "-t", "squashfs", "-o", "loop"])
+        await run(["mount", "/cdrom/OneNAS-SCALE.update", src, "-t", "squashfs", "-o", "loop"])
         try:
             params = {
                 "disks": disks,
