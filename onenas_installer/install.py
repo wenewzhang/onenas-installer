@@ -233,7 +233,7 @@ async def run_installer(disks, callback, version: str | None = None, language: s
                 "boot_mode": boot_mode,
             }
             process = await asyncio.create_subprocess_exec(
-                "python3", "-m", "truenas_install",
+                "python3", "-m", "onenas_install",
                 cwd=src,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
@@ -261,7 +261,7 @@ async def run_installer(disks, callback, version: str | None = None, language: s
                     elif "error" in data:
                         error = data["error"]
                     else:
-                        raise ValueError(f"Invalid truenas_install JSON: {data!r}")
+                        raise ValueError(f"Invalid onenas_install JSON: {data!r}")
             await process.wait()
 
             if error is not None:
