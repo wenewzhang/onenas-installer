@@ -63,6 +63,7 @@ async def install(destination_disks: list[Disk], wipe_disks: list[Disk], system_
                     version,
                     language,
                     boot_mode,
+                    upgrade=False,
                 )
             finally:
                 await run(["zpool", "export", "-f", ONE_POOL])
@@ -218,9 +219,9 @@ async def create_one_pool(devices):
 
 
 
-async def run_installer(disks, callback, version: str | None = None, language: str | None = None, boot_mode: str | None = None):
+async def run_installer(disks, callback, version: str | None = None, language: str | None = None, boot_mode: str | None = None, upgrade: bool = False):
     with tempfile.TemporaryDirectory() as src:
-        logger.info(f"run_installer: src = {src}")
+        logger.info(f"run_installer: src = {src}, upgrade = {upgrade}")
         await run(["mount", "/cdrom/OneNAS-SCALE.update", src, "-t", "squashfs", "-o", "loop"])
         try:
             params = {
@@ -231,6 +232,7 @@ async def run_installer(disks, callback, version: str | None = None, language: s
                 "version": version,
                 "language": language,
                 "boot_mode": boot_mode,
+                "upgrade": upgrade,
             }
             process = await asyncio.create_subprocess_exec(
                 "python3", "-m", "onenas_install",
@@ -279,17 +281,3 @@ def check_boot_mode():
         return "UEFI"
     else:
         return "BIOS"
-
-
-async def upgrade(callback: Callable, version: str | None = None, language: str | None = None):
-    """
-    系统升级功能（待实现）
-    
-    Args:
-        callback: 进度回调函数
-        version: 目标版本
-        language: 语言设置
-    """
-    # TODO: 实现系统升级功能
-    logger.info("Upgrade function called but not implemented yet")
-    raise NotImplementedError("Upgrade feature is not implemented yet")

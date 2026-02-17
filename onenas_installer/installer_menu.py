@@ -15,7 +15,7 @@ from .dialog import (
 )
 from .disks import Disk, list_disks
 from .exception import InstallError
-from .install import install, upgrade
+from .install import install, run_installer
 from .i18n import _, set_language, get_available_languages, get_language
 from .logger import logger
 
@@ -87,12 +87,76 @@ class InstallerMenu:
             await self._main_menu()
 
     async def _upgrade(self):
-        """系统升级功能（待实现）"""
-        logger.info("Upgrade feature not implemented yet")
-        await dialog_msgbox(
-            _("upgrade"),
-            _("upgrade_not_implemented")
+        """系统升级功能"""
+        while True:
+            await self._upgrade_internal()
+            await self._main_menu()
+
+    async def _upgrade_internal(self):
+        """执行系统升级的内部逻辑"""
+        logger.info("Starting upgrade process")
+        disks = await list_disks()
+        vendor = self.installer.vendor
+        logger.info(f"Detected disks: {[d.name for d in disks]}")
+
+        if not disks:
+            logger.warning("No drives detected")
+            await dialog_msgbox(_("choose_destination"), _("no_drives"))
+            return False
+
+        # 检查是否有任何硬盘存在 one-pool
+        has_onenas = any(
+            any(
+                zfs_member.pool == "one-pool"
+                for zfs_member in disk.zfs_members
+            )
+            for disk in disks
         )
+
+        if not has_onenas:
+            logger.warning("No existing OneNAS system found")
+            await dialog_msgbox(
+                _("upgrade"),
+                _("no_existing_system")
+            )
+            return False
+
+        # 确认升级
+        text = "\n".join(
+            [
+                _("upgrade_confirmation_title", vendor=vendor),
+                "",
+                _("proceed_upgrade"),
+            ]
+        )
+        if not await dialog_yesno(_("upgrade"), text):
+            logger.info("Upgrade cancelled by user at confirmation dialog")
+            return False
+
+        try:
+            logger.info(f"Starting upgrade")
+            await run_installer(
+                [disk.name for disk in disks],
+                self._callback,
+                self.installer.version,
+                get_language(),
+                "",
+                True
+            )
+            logger.info("Upgrade completed successfully")
+        except InstallError as e:
+            logger.error(f"Upgrade failed: {e.message}")
+            await dialog_msgbox(_("upgrade_error"), e.message)
+            return False
+
+        await dialog_msgbox(
+            _("upgrade_succeeded"),
+            _(
+                "upgrade_succeeded_msg",
+                vendor=self.installer.vendor
+            ),
+        )
+        return True
 
     async def _install_internal(self):
         logger.info("Starting install/upgrade process")
