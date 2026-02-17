@@ -13,7 +13,9 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
     "en": {
         # 主菜单
         "main_menu_title": "{vendor} {version} Console Setup",
-        "install_upgrade": "Install/Upgrade",
+        "install": "Install",
+        "upgrade": "Upgrade",
+        "upgrade_not_implemented": "Upgrade feature is not implemented yet.",
         "shell": "Shell",
         "reboot_system": "Reboot System",
         "shutdown_system": "Shutdown System",
@@ -95,7 +97,10 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
     "zh": {
         # 主菜单
         "main_menu_title": "{vendor} {version} 控制台设置",
-        "install_upgrade": "安装/升级",
+        "install": "安装",
+        "upgrade": "升级",
+        "upgrade_not_implemented": "升级功能尚未实现。",
+        
         "shell": "命令行",
         "reboot_system": "重启系统",
         "shutdown_system": "关闭系统",
@@ -242,7 +247,8 @@ def get_menu_items() -> Dict[str, Callable]:
     注意：这个函数返回的是键名，实际显示文本需要通过 _() 转换
     """
     return {
-        "install_upgrade": None,
+        "install": None,
+        "upgrade": None,
         "shell": None,
         "reboot_system": None,
         "shutdown_system": None,

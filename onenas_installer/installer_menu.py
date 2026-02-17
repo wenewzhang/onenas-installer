@@ -15,7 +15,7 @@ from .dialog import (
 )
 from .disks import Disk, list_disks
 from .exception import InstallError
-from .install import install
+from .install import install, upgrade
 from .i18n import _, set_language, get_available_languages, get_language
 from .logger import logger
 
@@ -32,7 +32,8 @@ class InstallerMenu:
         logger.info("Displaying main menu")
         # 使用 lambda 来确保每次菜单显示时都使用当前语言的翻译
         menu_items = {
-            _("install_upgrade"): self._install_upgrade,
+            _("install"): self._install,
+            _("upgrade"): self._upgrade,
             _("shell"): self._shell,
             _("reboot_system"): self._reboot,
             _("shutdown_system"): self._shutdown,
@@ -80,12 +81,20 @@ class InstallerMenu:
             # 返回主菜单以刷新显示
             return
 
-    async def _install_upgrade(self):
+    async def _install(self):
         while True:
-            await self._install_upgrade_internal()
+            await self._install_internal()
             await self._main_menu()
 
-    async def _install_upgrade_internal(self):
+    async def _upgrade(self):
+        """系统升级功能（待实现）"""
+        logger.info("Upgrade feature not implemented yet")
+        await dialog_msgbox(
+            _("upgrade"),
+            _("upgrade_not_implemented")
+        )
+
+    async def _install_internal(self):
         logger.info("Starting install/upgrade process")
         disks = await list_disks()
         vendor = self.installer.vendor

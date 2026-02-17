@@ -12,7 +12,7 @@ from .lock import installation_lock
 from .logger import logger
 from .utils import get_partitions, run
 
-__all__ = ["InstallError", "install"]
+__all__ = ["InstallError", "install", "upgrade"]
 
 ONE_POOL = "one-pool"
 
@@ -279,3 +279,17 @@ def check_boot_mode():
         return "UEFI"
     else:
         return "BIOS"
+
+
+async def upgrade(callback: Callable, version: str | None = None, language: str | None = None):
+    """
+    系统升级功能（待实现）
+    
+    Args:
+        callback: 进度回调函数
+        version: 目标版本
+        language: 语言设置
+    """
+    # TODO: 实现系统升级功能
+    logger.info("Upgrade function called but not implemented yet")
+    raise NotImplementedError("Upgrade feature is not implemented yet")
