@@ -385,6 +385,9 @@ class InstallerMenu:
         """
         Check if a ZFS pool with the given name exists on the system.
         
+        This method checks both imported pools (via zpool list) and 
+        available but not imported pools (via zpool import).
+        
         Args:
             pool_name: Name of the ZFS pool to check
         
@@ -392,6 +395,7 @@ class InstallerMenu:
             bool: True if pool exists, False otherwise
         """
         try:
+            # First check if pool is already imported
             result = subprocess.run(
                 ["zpool", "list", "-H", "-o", "name", pool_name],
                 capture_output=True,
@@ -399,8 +403,24 @@ class InstallerMenu:
                 encoding="utf-8",
                 errors="ignore"
             )
-            # If return code is 0 and output contains the pool name, pool exists
-            return result.returncode == 0 and pool_name in result.stdout.strip()
+            if result.returncode == 0 and pool_name in result.stdout.strip():
+                return True
+            
+            # If not imported, check if pool exists but is not imported
+            # zpool import without arguments lists all pools available for import
+            result = subprocess.run(
+                ["zpool", "import", "-o", "name"],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="ignore"
+            )
+            if result.returncode == 0:
+                for line in result.stdout.strip().split("\n"):
+                    if pool_name in line:
+                        return True
+            
+            return False
         except Exception as e:
             logger.error("Failed to check pool existence: %s", e)
             return False
