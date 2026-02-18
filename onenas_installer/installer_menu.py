@@ -18,7 +18,7 @@ from .exception import InstallError
 from .install import install, run_installer
 from .i18n import _, set_language, get_available_languages, get_language
 from .logger import logger
-
+import subprocess  # noqa
 
 class InstallerMenu:
     def __init__(self, installer):
@@ -105,14 +105,8 @@ class InstallerMenu:
             return False
 
         # 检查是否有任何硬盘存在 one-pool
-        has_onenas = any(
-            any(
-                zfs_member.pool == "one-pool"
-                for zfs_member in disk.zfs_members
-            )
-            for disk in disks
-        )
-
+        has_onenas = self._check_zfs_pool_exists("one-pool")
+    
         if not has_onenas:
             logger.warning("No existing OneNAS system found")
             await dialog_msgbox(
@@ -386,3 +380,26 @@ class InstallerMenu:
         logger.info(f"[{int(progress * 100)}%] {message}")
         sys.stdout.write(f"[{int(progress * 100)}%] {message}\n")
         sys.stdout.flush()
+    def _check_zfs_pool_exists(pool_name):
+        """
+        Check if a ZFS pool with the given name exists on the system.
+        
+        Args:
+            pool_name: Name of the ZFS pool to check
+        
+        Returns:
+            bool: True if pool exists, False otherwise
+        """
+        try:
+            result = subprocess.run(
+                ["zpool", "list", "-H", "-o", "name", pool_name],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="ignore"
+            )
+            # If return code is 0 and output contains the pool name, pool exists
+            return result.returncode == 0 and pool_name in result.stdout.strip()
+        except Exception as e:
+            logger.error("Failed to check pool existence: %s", e)
+            return False
