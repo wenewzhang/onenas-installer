@@ -380,7 +380,8 @@ class InstallerMenu:
         logger.info(f"[{int(progress * 100)}%] {message}")
         sys.stdout.write(f"[{int(progress * 100)}%] {message}\n")
         sys.stdout.flush()
-    def _check_zfs_pool_exists(pool_name):
+
+    def _check_zfs_pool_exists(self, pool_name):
         """
         Check if a ZFS pool with the given name exists on the system.
         
