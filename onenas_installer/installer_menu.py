@@ -135,7 +135,8 @@ class InstallerMenu:
                 self.installer.version,
                 get_language(),
                 "",
-                True
+                True,
+                vendor=self.installer.vendor,
             )
             logger.info("Upgrade completed successfully")
         except InstallError as e:
@@ -325,6 +326,7 @@ class InstallerMenu:
                 self._callback,
                 self.installer.version,
                 get_language(),
+                self.installer.vendor,
             )
             logger.info("Installation completed successfully")
         except InstallError as e:

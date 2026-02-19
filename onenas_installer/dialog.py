@@ -16,7 +16,10 @@ async def dialog(args, check=False):
     from .i18n import _
     ok_label = _("ok")
     cancel_label = _("cancel")
-    args = ["dialog", "--ok-label", ok_label, "--cancel-label", cancel_label] + args
+    yes_label = _("yes")
+    no_label = _("no")
+    args = ["dialog", "--ok-label", ok_label, "--cancel-label", cancel_label,
+            "--yes-label", yes_label, "--no-label", no_label] + args
 
     process = await asyncio.create_subprocess_exec(*args, stderr=subprocess.PIPE)
     _, stderr = await process.communicate()
