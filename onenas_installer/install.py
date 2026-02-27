@@ -35,9 +35,9 @@ async def install(destination_disks: list[Disk], wipe_disks: list[Disk], system_
             for disk in destination_disks:
                 callback(0, _("formatting_disk", disk=disk.name))
                 if boot_mode == "UEFI":
-                    await format_disk_uefi(disk, system_pct, min_system_size_str, callback)
+                    await format_disk_onenas(disk, system_pct, min_system_size_str, true, callback)
                 else:
-                    await format_disk_bios2(disk, system_pct, min_system_size_str, callback)
+                    await format_disk_onenas(disk, system_pct, min_system_size_str, false, callback)
 
             # for disk in wipe_disks:
             #     callback(0, f"Wiping disk {disk.name}")
@@ -196,6 +196,39 @@ async def format_disk(disk: Disk, callback: Callable):
     # if set_pmbr:
     #     await run(["parted", "-s", disk.device, "disk_set", "pmbr_boot", "on"], check=False)
 
+async def format_disk_onenas(disk: Disk, system_pct: int,  min_system_size:str, is_uefi: bool, callback: Callable):
+    await wipe_disk(disk, callback)
+
+    # Create BIOS boot partition
+    await run(["sgdisk", "-a4096", "-n1:0:+1024K", "-t1:EF02", "-A1:set:2", disk.device])
+
+    # Create EFI partition (Even if not used, allows user to switch to UEFI later)
+    await run(["sgdisk", "-n2:0:+524288K", "-t2:EF00", disk.device])
+    if system_pct == 100:
+        await run(["sgdisk", "-n3:0:0", "-t3:BF01", disk.device])     
+        part_nums = [1, 2, 3]  
+    else:
+        await run(["sgdisk", f"-n3:0:+{min_system_size}", "-t3:BF01", disk.device])        
+        await run(["sgdisk", "-n4:0:0", "-t3:BF01", disk.device])
+        part_nums = [1, 2, 3, 4]
+
+    # Create data partition
+    # await run(["sgdisk", "-n3:0:0", "-t3:BF01", disk.device])
+
+    # Bad hardware is bad, but we've seen a few users
+    # state that by the time we run `parted` command
+    # down below OR the caller of this function tries
+    # to do something with the partition(s), they won't
+    # be present. This is almost _exclusively_ related
+    # to bad hardware, but we will wait up to 30 seconds
+    # for the partitions to show up in sysfs.
+    disk_parts = await get_partitions(disk.device, part_nums, tries=30)
+    for partnum, part_device in disk_parts.items():
+        if part_device is None:
+            raise InstallError(f"Failed to find partition number {partnum} on {disk.name}")
+
+    if is_uefi:
+        await run(["parted", "-s", disk.device, "disk_set", "pmbr_boot", "on"], check=False)
 
 async def create_one_pool(devices):
     await run(
