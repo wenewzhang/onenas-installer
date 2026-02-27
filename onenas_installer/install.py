@@ -35,9 +35,9 @@ async def install(destination_disks: list[Disk], wipe_disks: list[Disk], system_
             for disk in destination_disks:
                 callback(0, _("formatting_disk", disk=disk.name))
                 if boot_mode == "UEFI":
-                    await format_disk_onenas(disk, system_pct, min_system_size_str, true, callback)
+                    await format_disk_onenas(disk, system_pct, min_system_size_str, True, callback)
                 else:
-                    await format_disk_onenas(disk, system_pct, min_system_size_str, false, callback)
+                    await format_disk_onenas(disk, system_pct, min_system_size_str, False, callback)
 
             # for disk in wipe_disks:
             #     callback(0, f"Wiping disk {disk.name}")
