@@ -45,7 +45,8 @@ async def install(destination_disks: list[Disk], wipe_disks: list[Disk], system_
 
             disk_parts = list()
             
-            part_num = 2 if system_pct == 100 else 3
+            part_num = 2 
+            # if system_pct == 100 else 3
 
             for disk in destination_disks:
                 found = (await get_partitions(disk.device, [part_num]))[part_num]
