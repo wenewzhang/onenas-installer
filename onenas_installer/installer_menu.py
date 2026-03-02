@@ -137,6 +137,7 @@ class InstallerMenu:
                 "",
                 True,
                 vendor=self.installer.vendor,
+                swap_size=0,
             )
             logger.info("Upgrade completed successfully")
         except InstallError as e:
@@ -315,6 +316,29 @@ class InstallerMenu:
         # use_full_disk: 是否使用整个磁盘
         # system_partition_percentage: 系统分区占用的百分比
 
+        # 获取系统内存大小并让用户选择 swap 大小
+        mem_gb = self._get_memory_size_gb()
+        swap_choice = await dialog_radiolist(
+            _("swap_title"),
+            _("swap_choice_text", memory=f"{mem_gb:.1f}"),
+            {
+                "none": (_("swap_none"), True),
+                "half": (_("swap_half", size=f"{mem_gb * 0.5:.1f}"), False),
+                "full": (_("swap_full", size=f"{mem_gb:.1f}"), False),
+            },
+        )
+        
+        if swap_choice is None:
+            return False  # 用户取消
+        
+        # 计算 swap 大小（字节）
+        if swap_choice == "none":
+            swap_size = 0
+        elif swap_choice == "half":
+            swap_size = int(mem_gb * 0.5 * 1024 * 1024 * 1024)
+        else:  # "full"
+            swap_size = int(mem_gb * 1024 * 1024 * 1024)
+
         try:
             logger.info(f"Starting installation to disks: {destination_disks}")
             logger.info(f"Starting installation wipe_disks: {wipe_disks}")
@@ -323,6 +347,7 @@ class InstallerMenu:
                 self._select_disks(disks, wipe_disks),
                 system_partition_percentage,
                 min_disk_system_size,
+                swap_size,
                 self._callback,
                 self.installer.version,
                 get_language(),
@@ -347,6 +372,20 @@ class InstallerMenu:
     def _select_disks(self, disks: list[Disk], disks_names: list[str]):
         disks_dict = {disk.name: disk for disk in disks}
         return [disks_dict[disk_name] for disk_name in disks_names]
+
+    def _get_memory_size_gb(self) -> float:
+        """获取系统内存大小（GB）"""
+        try:
+            with open("/proc/meminfo", "r") as f:
+                for line in f:
+                    if line.startswith("MemTotal:"):
+                        # MemTotal 格式: "MemTotal:       16384000 kB"
+                        parts = line.split()
+                        kb = int(parts[1])
+                        return kb / 1024 / 1024  # 转换为 GB
+        except Exception:
+            pass
+        return 8.0  # 默认返回 8GB
 
     async def _authentication_truenas_admin(self):
         return await self._authentication_password(

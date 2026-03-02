@@ -85,6 +85,13 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "confirm_partition_size": "Confirm Partition Size",
         "partition_size_preview": "Total capacity: {total_size}\n\nSystem partition: {percentage}% = {system_size}\nRemaining space: {remaining_size}\n\nSmallest disk: {min_disk_name} ({min_disk_size})\nSystem partition on smallest disk: {min_disk_system_size}\n\nIs this correct?",
         
+        # Swap 相关
+        "swap_title": "Swap Configuration",
+        "swap_choice_text": "System memory: {memory} GB\n\nPlease select swap size:",
+        "swap_none": "Do not create swap",
+        "swap_half": "Create 0.5x memory swap ({size} GB)",
+        "swap_full": "Create 1x memory swap ({size} GB)",
+        
         # 安装进度 (callback 消息)
         "wiping_disk": "Wiping disk {disk}",
         "formatting_disk": "Formatting disk {disk}",
@@ -175,6 +182,13 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         "percentage_invalid_error": "请输入有效的数字。",
         "confirm_partition_size": "确认分区大小",
         "partition_size_preview": "总容量: {total_size}\n\n系统分区: {percentage}% = {system_size}\n剩余空间: {remaining_size}\n\n最小硬盘: {min_disk_name} ({min_disk_size})\n该硬盘系统分区: {min_disk_system_size}\n\n是否正确?",
+        
+        # Swap 相关
+        "swap_title": "Swap 配置",
+        "swap_choice_text": "系统内存: {memory} GB\n\n请选择 swap 大小:",
+        "swap_none": "不创建 swap",
+        "swap_half": "创建 0.5 倍内存的 swap ({size} GB)",
+        "swap_full": "创建 1 倍内存的 swap ({size} GB)",
         
         # 安装进度 (callback 消息)
         "wiping_disk": "正在擦除磁盘 {disk}",

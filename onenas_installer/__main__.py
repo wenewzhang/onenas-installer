@@ -17,7 +17,7 @@ def main():
     args = parser.parse_args()
 
     vendor  = "OneNAS"
-    version = "zuti-260301"
+    version = "zuti-260302"
     try:
         with open("/.data/.version") as f:
             version = f.read().strip()
