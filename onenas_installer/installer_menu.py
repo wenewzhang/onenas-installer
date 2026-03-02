@@ -320,11 +320,11 @@ class InstallerMenu:
         mem_gb = self._get_memory_size_gb()
         swap_choice = await dialog_radiolist(
             _("swap_title"),
-            _("swap_choice_text", memory=f"{mem_gb:.1f}"),
+            _("swap_choice_text", memory=f"{mem_gb:.2f}"),
             {
                 "none": (_("swap_none"), True),
-                "half": (_("swap_half", size=f"{mem_gb * 0.5:.1f}"), False),
-                "full": (_("swap_full", size=f"{mem_gb:.1f}"), False),
+                "half": (_("swap_half", size=f"{mem_gb * 0.5:.2f}"), False),
+                "full": (_("swap_full", size=f"{mem_gb:.2f}"), False),
             },
         )
         
@@ -335,10 +335,11 @@ class InstallerMenu:
         if swap_choice == "none":
             swap_size = 0
         elif swap_choice == "half":
-            swap_size = int(mem_gb * 0.5 * 1024 * 1024 * 1024)
+            swap_size = int(mem_gb * 0.5 * 1024)
         else:  # "full"
-            swap_size = int(mem_gb * 1024 * 1024 * 1024)
+            swap_size = int(mem_gb * 1024 )
 
+        logger.info("swap size: %s", swap_size)
         try:
             logger.info(f"Starting installation to disks: {destination_disks}")
             logger.info(f"Starting installation wipe_disks: {wipe_disks}")

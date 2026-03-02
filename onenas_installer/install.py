@@ -17,7 +17,9 @@ __all__ = ["InstallError", "install", "upgrade"]
 ONE_POOL = "one-pool"
 
 
-async def install(destination_disks: list[Disk], wipe_disks: list[Disk], system_pct: int, min_system_size: int, swap_size: int, callback: Callable, version: str | None = None, language: str | None = None, vendor: str | None = None):
+async def install(destination_disks: list[Disk], wipe_disks: list[Disk], system_pct: int, min_system_size: int, 
+                  swap_size: int, callback: Callable, version: str | None = None, 
+                  language: str | None = None, vendor: str | None = None):
     boot_mode = check_boot_mode()
     min_system_size_mib = min_system_size // (1024 * 1024)
     min_system_size_str = f"{min_system_size_mib}m"  # 例如: "+8192m"
