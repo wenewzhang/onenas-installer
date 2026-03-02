@@ -1,7 +1,7 @@
 import argparse
 import asyncio
 import json
-
+import os
 
 # from ixhardware import get_chassis_hardware, parse_dmi
 
@@ -17,7 +17,7 @@ def main():
     args = parser.parse_args()
 
     vendor  = "OneNAS"
-    version = "zuti-260302"
+    version = os.environ.get('ONENAS_VERSION', 'zuti-260302')
     try:
         with open("/.data/.version") as f:
             version = f.read().strip()
