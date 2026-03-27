@@ -17,9 +17,9 @@ __all__ = ["InstallError", "install", "upgrade"]
 ONE_POOL = "one-pool"
 
 
-async def install(destination_disks: list[Disk], wipe_disks: list[Disk], system_pct: int, min_system_size: int, 
-                  swap_size: int, callback: Callable, version: str | None = None, 
-                  language: str | None = None, vendor: str | None = None):
+async def install(destination_disks: list[Disk], wipe_disks: list[Disk], system_pct: int, min_system_size: int,
+                  swap_size: int, callback: Callable, version: str | None = None,
+                  language: str | None = None, vendor: str | None = None, root_password: str | None = None):
     boot_mode = check_boot_mode()
     min_system_size_mib = min_system_size // (1024 * 1024)
     min_system_size_str = f"{min_system_size_mib}m"  # 例如: "+8192m"
@@ -68,7 +68,8 @@ async def install(destination_disks: list[Disk], wipe_disks: list[Disk], system_
                     boot_mode,
                     upgrade=False,
                     vendor=vendor,
-                    swap_size=swap_size
+                    swap_size=swap_size,
+                    root_password=root_password,
                 )
             finally:
                 await run(["zpool", "export", "-f", ONE_POOL])
@@ -263,7 +264,7 @@ async def create_one_pool(devices):
 
 
 
-async def run_installer(disks, callback, version: str | None = None, language: str | None = None, boot_mode: str | None = None, upgrade: bool = False, vendor: str | None = None, swap_size: int=0):
+async def run_installer(disks, callback, version: str | None = None, language: str | None = None, boot_mode: str | None = None, upgrade: bool = False, vendor: str | None = None, swap_size: int = 0, root_password: str | None = None):
     with tempfile.TemporaryDirectory() as src:
         logger.info(f"run_installer: src = {src}, upgrade = {upgrade}")
         await run(["mount", "/cdrom/OneNAS-SCALE.update", src, "-t", "squashfs", "-o", "loop"])
@@ -279,6 +280,7 @@ async def run_installer(disks, callback, version: str | None = None, language: s
                 "upgrade": upgrade,
                 "vendor": vendor,
                 "swap_size": swap_size,
+                "root_password": root_password,
             }
             process = await asyncio.create_subprocess_exec(
                 "python3", "-m", "onenas_install",

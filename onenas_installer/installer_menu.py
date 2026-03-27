@@ -340,6 +340,16 @@ class InstallerMenu:
             swap_size = int(mem_gb * 1024 )
 
         logger.info("swap size: %s", swap_size)
+
+        # 输入 root 密码
+        root_password = await dialog_password(
+            _("root_password_title"),
+            _("password"),
+            _("confirm_password"),
+        )
+        if root_password is None:
+            return False  # 用户取消
+
         try:
             logger.info(f"Starting installation to disks: {destination_disks}")
             logger.info(f"Starting installation wipe_disks: {wipe_disks}")
@@ -353,6 +363,7 @@ class InstallerMenu:
                 self.installer.version,
                 get_language(),
                 self.installer.vendor,
+                root_password,
             )
             logger.info("Installation completed successfully")
         except InstallError as e:

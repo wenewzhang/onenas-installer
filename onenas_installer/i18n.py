@@ -65,6 +65,8 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         # 密码
         "password": "Password",
         "confirm_password": "Confirm Password",
+        "root_password_title": "Root Password",
+        "root_password_text": "Please enter the root password for system login:",
         "error": "Error",
         "empty_password": "Empty passwords are not allowed.",
         "password_mismatch": "Passwords do not match.",
@@ -163,6 +165,8 @@ TRANSLATIONS: Dict[str, Dict[str, str]] = {
         # 密码
         "password": "密码",
         "confirm_password": "确认密码",
+        "root_password_title": "Root 密码",
+        "root_password_text": "请输入用于系统登录的 Root 密码：",
         "error": "错误",
         "empty_password": "不允许使用空密码。",
         "password_mismatch": "密码不匹配。",
