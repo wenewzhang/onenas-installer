@@ -108,6 +108,10 @@ async def dialog_password(title, password_label=None, confirm_label=None):
     password_label = password_label or _("password")
     confirm_label = confirm_label or _("confirm_password")
     
+    # 获取当前语言的按钮标签
+    ok_label = _("ok")
+    cancel_label = _("cancel")
+    
     with tempfile.NamedTemporaryFile("w") as dialogrc:
         dialogrc.write(textwrap.dedent("""\
             bindkey formfield TAB FORM_NEXT
@@ -128,6 +132,8 @@ async def dialog_password(title, password_label=None, confirm_label=None):
                     *(
                         [
                             "dialog",
+                            "--ok-label", ok_label,
+                            "--cancel-label", cancel_label,
                             "--insecure",
                             "--output-fd", f"{fd}",
                             "--visit-items",

@@ -255,7 +255,9 @@ async def create_one_pool(devices):
     await run(["zfs", "create", "-o", "mountpoint=none", f"{ONE_POOL}/ROOT"])
     # await run(["zfs", "create", "-o", "canmount=noauto", "-o", "mountpoint=/", f"{ONE_POOL}/ROOT/{bootpool}"])
     # await run(["zpool", "set", f"bootfs={ONE_POOL}/ROOT/{bootpool}", ONE_POOL])
-    await run(["zfs", "create", "-o", "mountpoint=/var/log", "-o", "canmount=noauto", f"{ONE_POOL}/log"])
+    # var-log.mount on debian 13 will mount  legacy dataset, not need on fstab
+    await run(["zfs", "create", "-o", "mountpoint=/var/log", "-o", "canmount=legacy", f"{ONE_POOL}/log"])
+    
     await run(["zfs", "set", "compression=zstd", f"{ONE_POOL}/log"])
     await run(["zfs", "set", "atime=off", f"{ONE_POOL}/log"])
     await run(["zfs", "set", "logbias=throughput", f"{ONE_POOL}/log"])
