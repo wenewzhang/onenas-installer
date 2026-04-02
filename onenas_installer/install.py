@@ -235,7 +235,31 @@ async def format_disk_onenas(disk: Disk, system_pct: int,  min_system_size:str, 
     if is_uefi:
         await run(["parted", "-s", disk.device, "disk_set", "pmbr_boot", "on"], check=False)
 
+def find_devices_byid(devices: list[str]) -> list[str]:
+    """Find corresponding by-id device names for given device paths."""
+    result = []
+    by_id_dir = "/dev/disk/by-id"
+    for device in devices:
+        real_device = os.path.realpath(device)
+        found = None
+        if os.path.isdir(by_id_dir):
+            candidates = []
+            for name in os.listdir(by_id_dir):
+                by_id_path = os.path.join(by_id_dir, name)
+                if os.path.islink(by_id_path) and os.path.realpath(by_id_path) == real_device:
+                    candidates.append(by_id_path)
+            if candidates:
+                # Prefer ata- or nvme- names over wwn-
+                non_wwn = [c for c in candidates if not os.path.basename(c).startswith("wwn-")]
+                found = sorted(non_wwn)[0] if non_wwn else sorted(candidates)[0]
+        result.append(found if found else device)
+    return result
+
+
 async def create_one_pool(devices):
+    logger.info(f"create_one_pool devices before find_devices_byid: {devices}")
+    devices = find_devices_byid(devices)
+    logger.info(f"create_one_pool devices after find_devices_byid: {devices}")
     await run(
         [
             "zpool", "create", "-f",
